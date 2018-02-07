@@ -1,0 +1,59 @@
+Brian Liang - Northwestern University
+
+Hi! I think I've finished mostly everything besides benchmarking. 
+I just wanted to get a working solution back ASAP.
+
+My approach was to first find and use a language that I was both
+comfortable with and that had strong parallel programming support.
+
+I ended up using C#.
+
+Overall, I split my program into four methods.
+
+1. DownloadFile: 
+2. DownloadSingleStream
+3. DownloadInParallel
+4. DownloadChunk
+
+The first method served more so as the container method that called
+methods 2 and 3 (SingleStream vs Parallel) based on whether or not
+the file server supported byte range GET requests. DownloadInParallel
+called DownloadChunk based on the number of chunks desired.
+
+For the first part of the test, to check if the file server supported
+byte range GET requests, I called a request for the headers, and checked
+if the Accept-Ranges header exists and had a non-null value. If it did,
+DownloadInParallel was called. Otherwise, DownloadSingleStream was called.
+
+Regarding errors and retries, retries were enabled for both Downloading methods,
+wherein if the checksum comparing the downloaded chunk and the source-stream 
+returned false, the method would retry the download. Errors were caught and 
+printed, as I was not sure what to further process in the catch blocks. Integrity
+should be maintained through checking chunks. I also added final checks to compare
+actual and desired file sizes.
+
+Bonus:
+Regarding benchmarks, C#'s built in classes for method timing/benchmarking are
+muddled by background .NET noise that causes execution times to greatly vary.
+I would implement more thorough third-party benchmarks, but I first wanted
+to get this working copy out.
+
+Regarding limiting the number of concurrent chunks, I set a cap in my
+DownloadInParallel method to 20 for now.
+
+For partially-downloaded chunks, I felt that the implementation of download-retrying
+was safer on error, as resuming-partially downloaded chunks might result in chunks
+with small, but detrimental errors.
+
+Checksums were implemented after every chunk download, rather than at the end when
+the whole file was downloaded.
+
+All in all:
+Hopefully this solution meets some standards! It was pretty fun learning more about 
+HTTP requests and refreshing my knowledge on parallel programming.
+
+
+
+
+
+
